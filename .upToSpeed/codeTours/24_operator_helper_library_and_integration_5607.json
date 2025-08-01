@@ -6,7 +6,7 @@
   "steps": [
     {
       "type": "textOnly",
-      "description": "# Operator Integration via `OperatorHelperLib`\n\nWelcome to this walkthrough of how the Operator functionality is integrated throughout the GTE system. We'll explore the `OperatorHelperLib` - a standardized library that provides gas-efficient operator permission checks for other contracts, and see how it's used in practice within the `AccountManager` contract.",
+      "description": "Welcome to this walkthrough of how the Operator functionality is integrated throughout the GTE system. We'll explore the `OperatorHelperLib` - a standardized library that provides gas-efficient operator permission checks for other contracts, and see how it's used in practice within the `AccountManager` contract.",
       "title": "",
       "id": "70031"
     },

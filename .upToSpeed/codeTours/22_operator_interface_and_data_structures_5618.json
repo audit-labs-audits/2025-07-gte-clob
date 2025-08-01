@@ -253,12 +253,6 @@
       "description": "With **bitwise role flags**, **nested mappings**, **event emission**, and sequential, collision-safe **nonces**, the `Operator` system provides permission management and a verifiable on-chain audit trail.",
       "title": "",
       "id": "70524"
-    },
-    {
-      "type": "textOnly",
-      "description": "With **bitwise role flags**, **nested mappings**, transparent **event emission**, and sequential, collision-safe `nonces`, the `Operator` system provides permission management and a verifiable **on-chain audit trail**.",
-      "title": "",
-      "id": "70549"
     }
   ]
 }

@@ -282,7 +282,7 @@
     },
     {
       "type": "textOnly",
-      "description": "**State Changes Example**: When Alice deposits 1000 `USDC`, trades 500 `USDC` for 0.2 `ETH` (paying 1 `USDC` fee), her balance changes from `{USDC: 0, ETH: 0}` → `{USDC: 1000, ETH: 0}` → `{USDC: 499, ETH: 0.2}`. The protocol collects 1 `USDC` in fees, maintaining perfect accounting throughout.",
+      "description": "### State Changes Example\n\nLet's consider how a user's balance changes within the `AccountManager`:\n\n- **Deposit:** When a user deposits 1000 `USDC`, the contract credits their internal balance for that amount.\n\n- **Trade:** If they then trade 500 `USDC` for 0.2 `ETH`, the contract updates their balances accordingly, debiting the `USDC` and crediting the `ETH`.\n\n- **Fees:** Any trade fees are also handled during settlement. For instance, a 1 `USDC` fee would be debited from the user's balance and collected by the protocol.\n\nThis flow illustrates how the `AccountManager` serves as the central ledger for user funds throughout the trading lifecycle.",
       "title": "",
       "id": "70354"
     },

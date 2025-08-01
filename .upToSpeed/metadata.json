@@ -14,7 +14,7 @@
     "4.1: CLOBManager: Overview",
     "4.2: Want to learn more?"
   ],
-  "totalNumberOfSteps": 157,
+  "totalNumberOfSteps": 156,
   "filesCovered": [
     "contracts/account-manager/IAccountManager.sol",
     "contracts/clob/ICLOBManager.sol",
