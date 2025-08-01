@@ -1,0 +1,172 @@
+{
+  "title": "2.3: Operator: Core Implementation",
+  "id": "llP9LDSm+ZLv8CtJLi8mgZp7q4h9ahyugt2gsE98kOY=",
+  "originalId": 5606,
+  "position": 4,
+  "steps": [
+    {
+      "type": "textOnly",
+      "description": "This tour explores the `Operator` contract implementation, which provides a flexible permission system allowing account owners to delegate specific roles to trusted operators. This enables automated trading, batch operations, and third-party integrations while maintaining granular control over what actions each operator can perform.",
+      "title": "",
+      "id": "70425"
+    },
+    {
+      "type": "textOnly",
+      "description": "Roles are defined in the `OperatorRoles` `enum`, where each role corresponds to a unique bit position in the bitmask. This design enables storing multiple roles in a single `uint256`, optimizing for gas efficiency.",
+      "title": "",
+      "id": "70454"
+    },
+    {
+      "type": "highlight",
+      "description": "The `OperatorRoles` enum defines each role and its corresponding bit index in the `bitmask`.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 6,
+          "end": 13
+        }
+      ],
+      "title": "",
+      "id": "70429",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `OperatorStorage` struct uses a nested mapping (`operatorRoleApprovals`) to store the bitmask of roles an operator has for each account: `mapping(address account => mapping(address operator => uint256 roles))`.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 15,
+          "end": 17
+        }
+      ],
+      "title": "",
+      "id": "70459",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "**ERC-7201** namespaced storage prevents collisions by hashing a storage key (`\"OperatorStorage\"`), subtracting 1, and masking off the low 8 bits. The assembly block in `getOperatorStorage()` sets `self.slot` to this unique position, ensuring safe inheritance.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 22,
+          "end": 35
+        }
+      ],
+      "title": "",
+      "id": "70430",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "This internal function serves as a simple accessor for the `OperatorStorage` struct. It delegates the low-level task of retrieving the storage pointer to the `OperatorStorageLib`, abstracting away the complexity of calculating storage slots.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 51,
+          "end": 53
+        }
+      ],
+      "title": "",
+      "id": "70455",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `getOperatorRoleApprovals()` view function retrieves the raw bitmask of roles granted to an `operator` for a given `account`, serving as the basis for permission checks.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 55,
+          "end": 57
+        }
+      ],
+      "title": "",
+      "id": "70461",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `approveOperator()` function grants roles by OR-ing (`|`) the new `roles` bitmask with the existing permissions, then emits `OperatorApproved` with an incremented nonce for off-chain tracking.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 59,
+          "end": 66
+        }
+      ],
+      "title": "",
+      "id": "70446",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `disapproveOperator()` function revokes roles by AND-ing (`&`) the existing bitmask with the inverted `roles` bitmask (`~roles`), then emits `OperatorDisapproved` with a new nonce.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 68,
+          "end": 75
+        }
+      ],
+      "title": "",
+      "id": "70462",
+      "hideAreas": []
+    },
+    {
+      "type": "textOnly",
+      "description": "A standalone `isOperatorFor` function does not exist. Permission checks combine `getOperatorRoleApprovals()` with `OperatorHelperLib.assertHasRole()` to verify specific roles.",
+      "title": "",
+      "id": "70434"
+    },
+    {
+      "type": "highlight",
+      "description": "`assertHasRole()` throws if the required role bit is unset (`rolesPacked & (1 << uint8(role)) == 0`) and the **ADMIN bit** (`rolesPacked & 1`) is also unset, enforcing both granular and master-key permissions.",
+      "file": "contracts/utils/types/OperatorHelperLib.sol",
+      "highlight": [
+        {
+          "start": 11,
+          "end": 13
+        }
+      ],
+      "title": "",
+      "id": "70457",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "`onlySenderOrOperator()` functions illustrate how to bypass the account owner, fetch the operator’s bitmask via `getOperatorRoleApprovals()`, and call `assertHasRole()`, effectively implementing `isOperatorFor`.",
+      "file": "contracts/utils/types/OperatorHelperLib.sol",
+      "highlight": [
+        {
+          "start": 27,
+          "end": 33
+        }
+      ],
+      "title": "",
+      "id": "70463",
+      "hideAreas": []
+    },
+    {
+      "type": "textOnly",
+      "description": "The requested `getEventNonceAndIncrement` function is provided by `EventNonceLib.inc()`, which atomically increments and returns a shared `eventNonce` for off-chain message signing and replay protection.",
+      "title": "",
+      "id": "70439"
+    },
+    {
+      "type": "highlight",
+      "description": "`EventNonceLib.inc()` loads the namespaced `EventNonceStorage`, increments `eventNonce` with `++ds.eventNonce`, and returns the new value, ensuring **strict event ordering**.",
+      "file": "contracts/utils/types/EventNonce.sol",
+      "highlight": [
+        {
+          "start": 29,
+          "end": 34
+        }
+      ],
+      "title": "",
+      "id": "70458",
+      "hideAreas": []
+    }
+  ]
+}

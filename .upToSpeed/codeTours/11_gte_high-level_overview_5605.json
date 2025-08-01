@@ -1,0 +1,211 @@
+{
+  "title": "1.1: GTE High-Level Overview",
+  "id": "s/fhc6peMTKLpKPxv7F2LXxbR4EmqVcdeHcL9DSWR2A=",
+  "originalId": 5605,
+  "position": 1,
+  "steps": [
+    {
+      "type": "textOnly",
+      "description": "Welcome to the high-level overview of the **GTE** (Global Trading Engine) codebase.\n\nThis tour will introduce you to the core architectural concepts and the main smart contracts that power the system.\n\nThis tour explains the roles of the `AccountManager`, `CLOBManager`, and `CLOB` contracts, demonstrates how they interact, and provides a preview of other key components like the `Operator` and `Router` systems.",
+      "title": "",
+      "id": "70078"
+    },
+    {
+      "type": "textOnly",
+      "description": "The GTE system is built on three core pillars:\n\n- **AccountManager**: The \"bank\" or \"custodian\" that holds all user funds.\n- **CLOBManager**: The \"administrator\" or \"factory\" that creates and configures trading markets.\n- **CLOB**: The \"marketplace\" where trading actually happens for a specific asset pair.\n\nThis architecture separates the management of funds, markets, and trading, which provides a modular and secure system.",
+      "title": "",
+      "id": "70080"
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "contracts/account-manager/IAccountManager.sol"
+      ],
+      "description": "Let's start with the `AccountManager` interface. The **AccountManager** is the central vault for all user assets, responsible for handling deposits, withdrawals, and the settlement of trades.",
+      "title": "",
+      "id": "70081",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `deposit` and `withdraw` functions are the primary way for users to move funds into and out of the GTE ecosystem. These functions handle the transfer of tokens between user wallets and the `AccountManager` contract.",
+      "file": "contracts/account-manager/IAccountManager.sol",
+      "highlight": [
+        {
+          "start": 26,
+          "end": 27
+        }
+      ],
+      "title": "",
+      "id": "70085",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `settleIncomingOrder` function is critical for trade settlement. This restricted function is called by `CLOB` contracts to finalize trades and transfer assets between buyers and sellers. We'll see how this connects to the trading system later.",
+      "file": "contracts/account-manager/IAccountManager.sol",
+      "highlight": [
+        {
+          "start": 35,
+          "end": 35
+        }
+      ],
+      "title": "",
+      "id": "70086",
+      "hideAreas": []
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "contracts/clob/ICLOBManager.sol"
+      ],
+      "description": "Next is the `CLOBManager` interface. The `CLOBManager` acts as a factory for creating and managing individual trading markets. It deploys new `CLOB` contracts and configures their parameters.",
+      "title": "",
+      "id": "70090",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `createMarket` function is how new trading pairs are launched. An administrator calls this function with the base and quote tokens (like `ETH/USDC`) along with market settings to deploy a new `CLOB` contract.",
+      "file": "contracts/clob/ICLOBManager.sol",
+      "highlight": [
+        {
+          "start": 32,
+          "end": 34
+        }
+      ],
+      "title": "",
+      "id": "70092",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "These configuration functions like `setMaxLimitsPerTx`, `setTickSizes`, and `setMinLimitOrderAmounts` allow the `CLOBManager` to customize market rules and parameters, providing flexibility for different trading environments.",
+      "file": "contracts/clob/ICLOBManager.sol",
+      "highlight": [
+        {
+          "start": 36,
+          "end": 38
+        }
+      ],
+      "title": "",
+      "id": "70094",
+      "hideAreas": []
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "contracts/clob/ICLOB.sol"
+      ],
+      "description": "Now let's look at the `CLOB` interface. Each `CLOB` contract is a self-contained order book and matching engine for one specific trading pair created by the `CLOBManager`.",
+      "title": "",
+      "id": "70095",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "These are the main functions traders use to interact with the order book:\n\n- `postLimitOrder` places a new limit order\n- `postFillOrder` executes an immediate market order\n- `amend` modifies an existing order\n- `cancel` removes orders from the book\n\nThese functions define how users interact with each specific trading market.",
+      "file": "contracts/clob/ICLOB.sol",
+      "highlight": [
+        {
+          "start": 84,
+          "end": 94
+        }
+      ],
+      "title": "",
+      "id": "70096",
+      "hideAreas": []
+    },
+    {
+      "type": "textOnly",
+      "description": "Now let's see how these three core contracts work together throughout the complete lifecycle of market creation and trade settlement.",
+      "title": "",
+      "id": "70099"
+    },
+    {
+      "type": "highlight",
+      "description": "After creating the new market, the `CLOBManager` registers the new `CLOB` contract with the `AccountManager`. This authorization allows the market to move funds in the `AccountManager` during trade settlement.",
+      "file": "contracts/clob/CLOBManager.sol",
+      "highlight": [
+        {
+          "start": 217,
+          "end": 217
+        }
+      ],
+      "title": "",
+      "id": "70100",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "When trades occur, the `CLOB` contract calls the `AccountManager` to actually move the funds between buyers and sellers. This demonstrates the clear separation: `CLOB` handles matching, `AccountManager` handles settlement.",
+      "file": "contracts/clob/CLOB.sol",
+      "highlight": [
+        {
+          "start": 961,
+          "end": 961
+        }
+      ],
+      "title": "",
+      "id": "70102",
+      "hideAreas": []
+    },
+    {
+      "type": "textOnly",
+      "description": "This interaction demonstrates the core architectural principle: **separation of concerns**. `CLOBManager` creates and authorizes markets, `CLOB` contracts match trades, and `AccountManager` handles financial settlement.",
+      "title": "",
+      "id": "70104"
+    },
+    {
+      "type": "mcq",
+      "description": "What is the primary architectural purpose of separating the `CLOB` contract's trade matching logic from the `AccountManager`'s fund management?\n\nOptions:\n\n A). To allow the `CLOBManager` to directly settle all trades, centralizing settlement logic in the factory contract.\n\nB). To reduce the gas cost of order placement by offloading all token transfers to the `AccountManager` after a match occurs.\n\nC). To isolate trade execution logic within each market from the central fund custody and settlement logic, which enhances modularity and security.\n\nD). To ensure that only the `GTERouter` can initiate settlements, preventing direct user interaction with the `AccountManager`.\n\n\nCorrect: C). To isolate trade execution logic within each market from the central fund custody and settlement logic, which enhances modularity and security.\n\nExplanation: The correct answer is that this separation isolates trade execution from fund management. The `CLOB` contract is responsible for matching orders, but it does not hold user funds. When a trade is matched, the `CLOB` instructs the `AccountManager`—the system's central vault—to perform the settlement. This design enhances security by centralizing asset custody and modularity by keeping each market's logic self-contained.",
+      "title": "",
+      "id": "70106",
+      "text": "What is the primary architectural purpose of separating the `CLOB` contract's trade matching logic from the `AccountManager`'s fund management?",
+      "answers": [
+        "To allow the `CLOBManager` to directly settle all trades, centralizing settlement logic in the factory contract.",
+        "To reduce the gas cost of order placement by offloading all token transfers to the `AccountManager` after a match occurs.",
+        "To isolate trade execution logic within each market from the central fund custody and settlement logic, which enhances modularity and security.",
+        "To ensure that only the `GTERouter` can initiate settlements, preventing direct user interaction with the `AccountManager`."
+      ],
+      "correct": 2,
+      "explanation": "The correct answer is that this separation isolates trade execution from fund management. The `CLOB` contract is responsible for matching orders, but it does not hold user funds. When a trade is matched, the `CLOB` instructs the `AccountManager`—the system's central vault—to perform the settlement. This design enhances security by centralizing asset custody and modularity by keeping each market's logic self-contained."
+    },
+    {
+      "type": "textOnly",
+      "description": "The system also includes supporting components that enhance functionality and user experience.",
+      "title": "",
+      "id": "70107"
+    },
+    {
+      "type": "highlight",
+      "description": "The `Operator` system allows users to delegate trading permissions to other addresses. The `onlySenderOrOperator` modifier enforces this - functions like `deposit` can be called either by the account owner or their authorized operator. This delegation is useful for automated trading bots and market makers that act on a user's behalf.",
+      "file": "contracts/account-manager/AccountManager.sol",
+      "highlight": [
+        {
+          "start": 95,
+          "end": 98
+        }
+      ],
+      "title": "",
+      "id": "70109",
+      "hideAreas": []
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "contracts/router/GTERouter.sol"
+      ],
+      "description": "The `GTERouter` acts as a user-friendly entry point that simplifies common workflows. It can bundle multiple actions like depositing funds and placing orders into a single transaction, and provides routing between different liquidity sources.",
+      "title": "",
+      "id": "70110",
+      "hideAreas": []
+    },
+    {
+      "type": "textOnly",
+      "description": "This completes our high-level overview of the GTE architecture.\n\nYou've now seen the three core contracts (`AccountManager`, `CLOBManager`, and `CLOB`), understand their distinct roles, and have seen how they work together. You've also been introduced to the supporting `Operator` and `Router` components.\n\nSubsequent tours will dive deep into the implementation details of each component, building on this foundational understanding.",
+      "title": "",
+      "id": "70112"
+    }
+  ]
+}

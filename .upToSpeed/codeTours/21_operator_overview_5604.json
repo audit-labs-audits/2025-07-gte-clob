@@ -1,0 +1,241 @@
+{
+  "title": "2.1: Operator: Overview",
+  "id": "MBEfn5R/srFPB0YW2bN++Qw/mHHX13gy/DkurgmW7CA=",
+  "originalId": 5604,
+  "position": 2,
+  "steps": [
+    {
+      "type": "textOnly",
+      "description": "Welcome to the `Operator` component tour! In this walkthrough, we'll explore how the `GTE` system enables users to delegate specific permissions to other addresses, allowing automated systems like `trading bots` to act on their behalf safely and securely.",
+      "title": "",
+      "id": "70274"
+    },
+    {
+      "type": "textOnly",
+      "description": "## What is an Operator?\n\nAn **operator** is an address that a user delegates with specific permissions to perform actions on their behalf. This enables automated trading bots, market making services, and other third-party systems to operate with limited, well-defined access rather than full control.",
+      "title": "",
+      "id": "70275"
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "contracts/utils/Operator.sol"
+      ],
+      "description": "The `Operator.sol` contract is the core of the operator system. It defines the available roles, stores approvals in a bitmask, and provides functions to grant and revoke operator permissions.",
+      "title": "",
+      "id": "70276",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `OperatorRoles` enum lists six roles. Packing these into a `uint256` bitmask allows multiple permissions to be stored and checked efficiently in a single storage slot.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 6,
+          "end": 13
+        }
+      ],
+      "title": "",
+      "id": "70277",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "Operator approvals use a nested mapping: `operatorRoleApprovals[account][operator]` stores the packed roles bitmask. This design scales to many operators per account with minimal gas overhead.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 15,
+          "end": 17
+        }
+      ],
+      "title": "",
+      "id": "70278",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "`approveOperator` grants roles by computing `approvedRoles | roles`. Using a **bitwise OR** lets you add new bits without disturbing existing ones, making the update atomic. It emits `OperatorApproved` with a nonce for off-chain ordering.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 59,
+          "end": 66
+        }
+      ],
+      "title": "",
+      "id": "70279",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `disapproveOperator` function allows for the granular removal of specific permissions. It updates the operator's existing roles to remove only those specified in the `roles` parameter, preserving any others. To maintain a clear audit trail, it then emits an `OperatorDisapproved` event with a unique nonce.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 68,
+          "end": 75
+        }
+      ],
+      "title": "",
+      "id": "70280",
+      "hideAreas": []
+    },
+    {
+      "type": "mcq",
+      "description": "An account grants an operator both `CLOB_FILL` and `CLOB_LIMIT` roles. The account owner then calls `disapproveOperator`, passing only the `CLOB_LIMIT` role. Based on the implementation in `Operator.sol`, what is the operator's resulting permission status?\n\nOptions:\n\n A). The operator is left with only the `CLOB_LIMIT` role.\n\nB). The operator retains both `CLOB_FILL` and `CLOB_LIMIT` roles.\n\nC). The operator is left with only the `CLOB_FILL` role.\n\nD). The operator has all its roles revoked.\n\n\nCorrect: C). The operator is left with only the `CLOB_FILL` role.\n\nExplanation: The correct answer is that the operator is left with only the `CLOB_FILL` role. The `disapproveOperator` function calculates the new roles using the bitwise operation `approvedRoles & (~roles)`. \n\nLet's assume `CLOB_FILL` is bit 1 (value 2) and `CLOB_LIMIT` is bit 2 (value 4). The initial `approvedRoles` is `6` (`0b110`). The `roles` to be removed is `4` (`0b100`). The bitmask `~roles` is `...11111011`. The final operation is `0b110 & ...11111011`, which results in `0b010` (value 2). This means only the bit for `CLOB_FILL` remains set. \n\nThis demonstrates that the function correctly removes specific permissions without affecting others.",
+      "title": "",
+      "id": "70302",
+      "text": "An account grants an operator both `CLOB_FILL` and `CLOB_LIMIT` roles. The account owner then calls `disapproveOperator`, passing only the `CLOB_LIMIT` role. Based on the implementation in `Operator.sol`, what is the operator's resulting permission status?",
+      "answers": [
+        "The operator is left with only the `CLOB_LIMIT` role.",
+        "The operator retains both `CLOB_FILL` and `CLOB_LIMIT` roles.",
+        "The operator is left with only the `CLOB_FILL` role.",
+        "The operator has all its roles revoked."
+      ],
+      "correct": 2,
+      "explanation": "The correct answer is that the operator is left with only the `CLOB_FILL` role. The `disapproveOperator` function calculates the new roles using the bitwise operation `approvedRoles & (~roles)`. \n\nLet's assume `CLOB_FILL` is bit 1 (value 2) and `CLOB_LIMIT` is bit 2 (value 4). The initial `approvedRoles` is `6` (`0b110`). The `roles` to be removed is `4` (`0b100`). The bitmask `~roles` is `...11111011`. The final operation is `0b110 & ...11111011`, which results in `0b010` (value 2). This means only the bit for `CLOB_FILL` remains set. \n\nThis demonstrates that the function correctly removes specific permissions without affecting others."
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "contracts/utils/interfaces/IOperator.sol"
+      ],
+      "description": "The `IOperator.sol` interface exposes the public API: querying current approvals, granting roles, and revoking roles. Note that `disapproveOperator` serves as the revoke operation; there is no separate `isOperatorFor` function in this codebase.",
+      "title": "",
+      "id": "70281",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "Interface functions:\n- `getOperatorRoleApprovals(account, operator)` returns the roles bitmask.\n- `approveOperator(operator, roles)` grants bits.\n- `disapproveOperator(operator, roles)` clears bits.",
+      "file": "contracts/utils/interfaces/IOperator.sol",
+      "highlight": [
+        {
+          "start": 4,
+          "end": 8
+        }
+      ],
+      "title": "",
+      "id": "70282",
+      "hideAreas": []
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "contracts/utils/types/OperatorHelperLib.sol"
+      ],
+      "description": "`OperatorHelperLib.sol` centralizes permission-checking logic for other contracts. It provides modifiers and helper functions to enforce operator rules consistently across the system.",
+      "title": "",
+      "id": "70283",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "`assertHasRole(rolesPacked, role)` checks if the specific role bit is set or if the universal `ADMIN` bit (bit 0) is set. Treating `ADMIN` as a wildcard simplifies hierarchy.",
+      "file": "contracts/utils/types/OperatorHelperLib.sol",
+      "highlight": [
+        {
+          "start": 11,
+          "end": 13
+        }
+      ],
+      "title": "",
+      "id": "70284",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "`onlySenderOrOperator(operator, router, account, requiredRole)` allows access if `msg.sender` is the account owner, the global `router`, or an approved `operator` with `requiredRole`. This balances security with flexibility.",
+      "file": "contracts/utils/types/OperatorHelperLib.sol",
+      "highlight": [
+        {
+          "start": 16,
+          "end": 24
+        }
+      ],
+      "title": "",
+      "id": "70285",
+      "hideAreas": []
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "contracts/utils/types/EventNonce.sol"
+      ],
+      "description": "`EventNonce.sol` manages a shared on-chain counter for event nonces, ensuring all Operator events carry monotonically increasing identifiers for reliable off-chain ordering.",
+      "title": "",
+      "id": "70286",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "`inc()` increments and returns the shared nonce. Incorporating this into approval events prevents replay and helps external systems reconstruct event sequences accurately.",
+      "file": "contracts/utils/types/EventNonce.sol",
+      "highlight": [
+        {
+          "start": 28,
+          "end": 33
+        }
+      ],
+      "title": "",
+      "id": "70287",
+      "hideAreas": []
+    },
+    {
+      "type": "textOnly",
+      "description": "## Integration Example: AccountManager\n\n`AccountManager.sol` applies **operator checks** to protect its critical functions like deposits and withdrawals.",
+      "title": "",
+      "id": "70288"
+    },
+    {
+      "type": "highlight",
+      "description": "`modifier onlySenderOrOperator(account, requiredRole)` calls into `OperatorHelperLib` with storage, router address, the account, and required role, enforcing operator checks before execution.",
+      "file": "contracts/account-manager/AccountManager.sol",
+      "highlight": [
+        {
+          "start": 95,
+          "end": 99
+        }
+      ],
+      "title": "",
+      "id": "70289",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "**function deposit(address account, address token, uint256 amount) external onlySenderOrOperator(account, OperatorRoles.SPOT_DEPOSIT)** ensures only the account owner, router, or an operator with `SPOT_DEPOSIT` can credit tokens on behalf of the account.",
+      "file": "contracts/account-manager/AccountManager.sol",
+      "highlight": [
+        {
+          "start": 166,
+          "end": 170
+        }
+      ],
+      "title": "",
+      "id": "70290",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "`function withdraw(address account, address token, uint256 amount) external onlySenderOrOperator(account, OperatorRoles.SPOT_WITHDRAW)` ensures only approved withdraw operators can move tokens out of the account.",
+      "file": "contracts/account-manager/AccountManager.sol",
+      "highlight": [
+        {
+          "start": 178,
+          "end": 182
+        }
+      ],
+      "title": "",
+      "id": "70291",
+      "hideAreas": []
+    },
+    {
+      "type": "textOnly",
+      "description": "## Summary\n\n- Operator roles are bit-packed for gas efficiency and flexible permission combinations.\n- `Operator.sol` implements atomic grant/revoke via bitwise logic and emits events with nonces.\n- `IOperator.sol` is the public API; `disapproveOperator` acts as `revokeOperator`, and there is no separate `isOperatorFor` function.\n- `OperatorHelperLib.sol` centralizes permission checks across contracts.\n- `EventNonce.sol` provides ordered event nonces for off-chain listeners.\n- `AccountManager` uses these building blocks to enforce secure deposit and withdraw operations via its `onlySenderOrOperator` modifier.",
+      "title": "",
+      "id": "70292"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "packageName": "2025-07-gte-clob",
+  "packageVersion": 1,
+  "hash": "ac8f181b59844a411acdae00a2f5f29e5c34cf20",
+  "numberOfTours": 9,
+  "titleOfTours": [
+    "1.1: GTE High-Level Overview",
+    "2.1: Operator: Overview",
+    "2.2: Operator: Interface and Data Structures",
+    "2.3: Operator: Core Implementation",
+    "2.4: Operator: Helper Library and Integration",
+    "3.1: AccountManager: Overview",
+    "3.2: AccountManager: Implementation Details",
+    "4.1: CLOBManager: Overview",
+    "4.2: Want to learn more?"
+  ],
+  "totalNumberOfSteps": 157,
+  "filesCovered": [
+    "contracts/account-manager/IAccountManager.sol",
+    "contracts/clob/ICLOBManager.sol",
+    "contracts/clob/ICLOB.sol",
+    "contracts/clob/CLOBManager.sol",
+    "contracts/clob/CLOB.sol",
+    "contracts/account-manager/AccountManager.sol",
+    "contracts/router/GTERouter.sol",
+    "contracts/utils/Operator.sol",
+    "contracts/utils/interfaces/IOperator.sol",
+    "contracts/utils/types/OperatorHelperLib.sol",
+    "contracts/utils/types/EventNonce.sol",
+    "contracts/clob/types/FeeData.sol",
+    "contracts/clob/types/TransientMakerData.sol",
+    "contracts/clob/types/Roles.sol"
+  ],
+  "numberOfFilesCovered": 14
+}

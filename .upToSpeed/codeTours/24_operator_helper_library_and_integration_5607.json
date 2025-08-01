@@ -1,0 +1,181 @@
+{
+  "title": "2.4: Operator: Helper Library and Integration",
+  "id": "5DGXL+pm0Ojk39GJv6HiticdCJNBDVfTrecAC7H7T/8=",
+  "originalId": 5607,
+  "position": 5,
+  "steps": [
+    {
+      "type": "textOnly",
+      "description": "# Operator Integration via `OperatorHelperLib`\n\nWelcome to this walkthrough of how the Operator functionality is integrated throughout the GTE system. We'll explore the `OperatorHelperLib` - a standardized library that provides gas-efficient operator permission checks for other contracts, and see how it's used in practice within the `AccountManager` contract.",
+      "title": "",
+      "id": "70031"
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "contracts/utils/types/OperatorHelperLib.sol"
+      ],
+      "description": "The `OperatorHelperLib` is a utility library that centralizes operator permission logic. Rather than each contract implementing its own operator checks and directly interfacing with the `Operator` contract, this library provides a standardized approach that can be reused across the entire system.",
+      "title": "",
+      "id": "70032",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The library includes a helper function `assertHasRole` that checks if a packed roles value contains a specific role. This function examines whether the required role bit is set in the `packed roles` (line 12), or if the `ADMIN` role (`bit 0`) is set, which grants universal access.",
+      "file": "contracts/utils/types/OperatorHelperLib.sol",
+      "highlight": [
+        {
+          "start": 11,
+          "end": 13
+        }
+      ],
+      "title": "",
+      "id": "70033",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "Now let's examine the core `onlySenderOrOperator` function. This is the main access control logic that implements a three-tier permission system:\n\n1. **Direct ownership** (line 20): If `msg.sender` equals the `account`, access is immediately granted\n2. **Router bypass** (line 20): If `msg.sender` is the `gteRouter`, a globally trusted address, access is granted\n3. **Operator authorization** (lines 22-23): If neither above applies, it checks if `msg.sender` has the required operator role for the `account`",
+      "file": "contracts/utils/types/OperatorHelperLib.sol",
+      "highlight": [
+        {
+          "start": 15,
+          "end": 24
+        }
+      ],
+      "title": "",
+      "id": "70034",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `library` provides a second overloaded version without the router bypass. This variant only checks for direct ownership (line 28) or operator authorization (lines 30-31), making it suitable for contexts where router access shouldn't be permitted.",
+      "file": "contracts/utils/types/OperatorHelperLib.sol",
+      "highlight": [
+        {
+          "start": 26,
+          "end": 32
+        }
+      ],
+      "title": "",
+      "id": "70035",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The third variant is optimized for contracts that inherit from the `Operator` contract. Instead of making external calls to the operator contract, it directly accesses the `operatorRoleApprovals` mapping from storage (`line 43`). This provides significant gas savings for contracts that have their own operator storage.",
+      "file": "contracts/utils/types/OperatorHelperLib.sol",
+      "highlight": [
+        {
+          "start": 34,
+          "end": 45
+        }
+      ],
+      "title": "",
+      "id": "70036",
+      "hideAreas": []
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "contracts/account-manager/AccountManager.sol"
+      ],
+      "description": "Let's see how this library is used in practice. The `AccountManager` contract demonstrates real-world integration of the `OperatorHelperLib`. This contract manages user account balances, deposits, and withdrawals, and inherits from the `Operator` contract to provide operator functionality.",
+      "title": "",
+      "id": "70037",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `AccountManager` imports the `OperatorHelperLib` (line 7) and inherits from the `Operator` contract (line 13). This setup allows it to both have its own operator storage and utilize the helper library for permission checks.",
+      "file": "contracts/account-manager/AccountManager.sol",
+      "highlight": [
+        {
+          "start": 7,
+          "end": 13
+        }
+      ],
+      "title": "",
+      "id": "70038",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "Here's the key integration point: the `onlySenderOrOperator` modifier. This modifier calls the third variant of `OperatorHelperLib.onlySenderOrOperator` (`line 96`), passing:\n- `_getOperatorStorage()`: Direct access to the contract's operator storage\n- `gteRouter`: The globally trusted router address\n- `account`: The account being accessed\n- `requiredRole`: The specific permission needed",
+      "file": "contracts/account-manager/AccountManager.sol",
+      "highlight": [
+        {
+          "start": 94,
+          "end": 98
+        }
+      ],
+      "title": "",
+      "id": "70039",
+      "hideAreas": []
+    },
+    {
+      "type": "mcq",
+      "description": "In `AccountManager.sol`, the `onlySenderOrOperator` modifier calls the `OperatorHelperLib` function that takes an `OperatorStorage` parameter. What is the primary reason for using this specific variant?\n\nOptions:\n\n A). It is the only variant that allows for the `gteRouter` to bypass the operator check.\n\nB). It is more gas-efficient because it avoids an external call by reading directly from storage.\n\nC). It provides more detailed, custom error messages upon reversion compared to the other variants.\n\nD). It is required because `AccountManager` does not store the address of a separate `Operator` contract.\n\n\nCorrect: B). It is more gas-efficient because it avoids an external call by reading directly from storage.\n\nExplanation: The correct answer is that this variant is more gas-efficient. Since `AccountManager` inherits from `Operator`, it has `OperatorStorage` directly within its own storage layout. Accessing this storage directly (`sload`) is significantly cheaper than making an external `call` to a separate contract. The other variants are designed for contracts that do not inherit from `Operator` and must interact with it via an interface. The `gteRouter` bypass is available in another variant as well, so that is not the unique reason for this choice.",
+      "title": "",
+      "id": "70059",
+      "text": "In `AccountManager.sol`, the `onlySenderOrOperator` modifier calls the `OperatorHelperLib` function that takes an `OperatorStorage` parameter. What is the primary reason for using this specific variant?",
+      "answers": [
+        "It is the only variant that allows for the `gteRouter` to bypass the operator check.",
+        "It is more gas-efficient because it avoids an external call by reading directly from storage.",
+        "It provides more detailed, custom error messages upon reversion compared to the other variants.",
+        "It is required because `AccountManager` does not store the address of a separate `Operator` contract."
+      ],
+      "correct": 1,
+      "explanation": "The correct answer is that this variant is more gas-efficient. Since `AccountManager` inherits from `Operator`, it has `OperatorStorage` directly within its own storage layout. Accessing this storage directly (`sload`) is significantly cheaper than making an external `call` to a separate contract. The other variants are designed for contracts that do not inherit from `Operator` and must interact with it via an interface. The `gteRouter` bypass is available in another variant as well, so that is not the unique reason for this choice."
+    },
+    {
+      "type": "highlight",
+      "description": "The modifier is applied to the `deposit` function, which requires the `SPOT_DEPOSIT` role. This ensures that only the account owner, the GTE router, or an operator with proper `SPOT_DEPOSIT` permissions can deposit funds on behalf of an account. The function safely transfers tokens from the account to the contract after the permission check passes.",
+      "file": "contracts/account-manager/AccountManager.sol",
+      "highlight": [
+        {
+          "start": 165,
+          "end": 169
+        }
+      ],
+      "title": "",
+      "id": "70040",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "Similarly, the `withdraw` function uses the same `modifier` pattern but requires the `SPOT_WITHDRAW` role. This demonstrates how different functions can require different operator permissions, allowing for granular access control where operators might have deposit rights but not withdrawal rights, or vice versa.",
+      "file": "contracts/account-manager/AccountManager.sol",
+      "highlight": [
+        {
+          "start": 177,
+          "end": 181
+        }
+      ],
+      "title": "",
+      "id": "70041",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "These role constants come from the `OperatorRoles` enum in the base `Operator` contract. Notice how `SPOT_DEPOSIT` and `SPOT_WITHDRAW` are distinct roles (lines 10-11), enabling fine-grained permission management. The `ADMIN` role (line 7) provides universal access to all functions.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 6,
+          "end": 13
+        }
+      ],
+      "title": "",
+      "id": "70042",
+      "hideAreas": []
+    },
+    {
+      "type": "textOnly",
+      "description": "## System Integration Summary\n\nThe `OperatorHelperLib` creates a clean separation of concerns:\n\n- **Centralized Logic**: All operator permission checks use the same standardized logic\n- **Gas Efficiency**: Direct storage access for contracts with operator inheritance\n- **Flexibility**: Multiple variants for different use cases (with/without router bypass)\n- **Security**: Three-tier permission system (owner → router → operator) with granular role-based access\n\nThis architecture allows the **GTE system** to maintain consistent security policies across all contracts while providing the flexibility needed for complex DeFi operations.",
+      "title": "",
+      "id": "70043"
+    }
+  ]
+}

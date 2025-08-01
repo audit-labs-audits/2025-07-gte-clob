@@ -1,0 +1,264 @@
+{
+  "title": "2.2: Operator: Interface and Data Structures",
+  "id": "4BJ4L6mmhPbX7aPZWIELOEQzgqUuf+1xn4atNXIW950=",
+  "originalId": 5618,
+  "position": 3,
+  "steps": [
+    {
+      "type": "textOnly",
+      "description": "This tour examines the `Operator system`'s public interface and primary data structures. It enables account owners to delegate fine-grained permissions, supports modules like `CLOB` and `SPOT`, and ensures security and auditability through on-chain events and sequential nonces.",
+      "title": "",
+      "id": "70500"
+    },
+    {
+      "type": "textOnly",
+      "description": "Instruction vs Actual:\n- `revokeOperator` → `disapproveOperator`\n- `isOperatorFor` → `getOperatorRoleApprovals`\n- `getEventNonceAndIncrement` → internal `EventNonceLib.inc()`\n- `OperatorApproval` event → `OperatorApproved` & `OperatorDisapproved` events",
+      "title": "",
+      "id": "70541"
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "contracts/utils/interfaces/IOperator.sol"
+      ],
+      "description": "The `IOperator` interface defines the core public `functions` for operator permission management via bitwise role flags.",
+      "title": "",
+      "id": "70502",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `getOperatorRoleApprovals` function returns a bitmask of roles granted to an operator for a specific account, equivalent to `isOperatorFor` but with a full bitmask result.",
+      "file": "contracts/utils/interfaces/IOperator.sol",
+      "highlight": [
+        {
+          "start": 5,
+          "end": 5
+        }
+      ],
+      "title": "",
+      "id": "70542",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `approveOperator` function grants specified roles to an operator using bitwise OR, allowing for multi-role delegation.",
+      "file": "contracts/utils/interfaces/IOperator.sol",
+      "highlight": [
+        {
+          "start": 6,
+          "end": 6
+        }
+      ],
+      "title": "",
+      "id": "70519",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `disapproveOperator` function revokes specified roles from an operator using **bitwise AND with NOT**, preserving other roles—serves as `revokeOperator`.",
+      "file": "contracts/utils/interfaces/IOperator.sol",
+      "highlight": [
+        {
+          "start": 7,
+          "end": 7
+        }
+      ],
+      "title": "",
+      "id": "70543",
+      "hideAreas": []
+    },
+    {
+      "type": "textOnly",
+      "description": "Note: `getEventNonceAndIncrement` is not exposed in the interface. Nonce management occurs internally via `EventNonceLib.inc()` during event emission.",
+      "title": "",
+      "id": "70523"
+    },
+    {
+      "type": "highlight",
+      "description": "Importing `EventNonceLib` as `OperatorEventNonce` connects the nonce library to the Operator contract for sequential event numbering.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 4,
+          "end": 4
+        }
+      ],
+      "title": "",
+      "id": "70544",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The **OperatorApproved** and **OperatorDisapproved** events replace the expected **OperatorApproval** event. Each emits `eventNonce`, `account`, `operator`, and `roles` for a transparent audit trail.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 40,
+          "end": 46
+        }
+      ],
+      "title": "",
+      "id": "70527",
+      "hideAreas": []
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "contracts/utils/Operator.sol"
+      ],
+      "description": "The `Operator` contract implements `IOperator`, defines the permission set, storage layout, and event emission logic.",
+      "title": "",
+      "id": "70509",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `OperatorRoles` enum assigns each permission a bit position: `ADMIN=1`, `CLOB_FILL=2`, `CLOB_LIMIT=4`, `SPOT_DEPOSIT=8`, `SPOT_WITHDRAW=16`, `LAUNCHPAD_FILL=32`. Combine roles with bitwise OR (e.g., `1 | 4 = 5` grants `ADMIN` and `CLOB_LIMIT`).",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 6,
+          "end": 13
+        }
+      ],
+      "title": "",
+      "id": "70511",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `OperatorStorage` struct uses a nested mapping: `operatorRoleApprovals[account][operator]` stores a `uint256` bitmask of granted roles, enabling O(1) lookups.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 15,
+          "end": 17
+        }
+      ],
+      "title": "",
+      "id": "70540",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "This function adds new permissions by retrieving the operator's existing role bitmask and combining it with the new roles using a bitwise OR operation. An `OperatorApproved` event is then emitted, using an incrementing nonce to provide a unique identifier for ordering.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 59,
+          "end": 66
+        }
+      ],
+      "title": "",
+      "id": "70545",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "To grant new permissions, the function first looks up the operator's current roles. It then uses a bitwise OR operation to add the new roles without affecting existing ones. Finally, an `OperatorApproved` event is emitted with an incrementing nonce, which helps clients process these events in the correct order.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 59,
+          "end": 66
+        }
+      ],
+      "title": "",
+      "id": "70532",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "To remove permissions, this function first retrieves the operator's current roles. The key logic on line 72 uses a bitwise operation to clear only the specified roles, leaving any other approved roles intact. Finally, an event is emitted with a new nonce to log the change on-chain.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 68,
+          "end": 75
+        }
+      ],
+      "title": "",
+      "id": "70533",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "To remove permissions, this function uses a bitwise operation to clear only the specified roles, leaving any other approved roles untouched. Finally, it emits an event to record the disapproval on-chain, providing a new nonce for the event.",
+      "file": "contracts/utils/Operator.sol",
+      "highlight": [
+        {
+          "start": 68,
+          "end": 75
+        }
+      ],
+      "title": "",
+      "id": "70546",
+      "hideAreas": []
+    },
+    {
+      "type": "revealFiles",
+      "files": [
+        "contracts/utils/types/EventNonce.sol"
+      ],
+      "description": "The `EventNonce` library provides shared event nonce management for secure, sequential numbering and replay attack prevention.",
+      "title": "",
+      "id": "70547",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `EventNonceStorage` struct holds the `eventNonce` field, equivalent to the expected `EventNonce` struct with `_nonce` field.",
+      "file": "contracts/utils/types/EventNonce.sol",
+      "highlight": [
+        {
+          "start": 9,
+          "end": 11
+        }
+      ],
+      "title": "",
+      "id": "70535",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The `inc` function atomically increments and returns the nonce, serving the role of `getEventNonceAndIncrement`.",
+      "file": "contracts/utils/types/EventNonce.sol",
+      "highlight": [
+        {
+          "start": 28,
+          "end": 33
+        }
+      ],
+      "title": "",
+      "id": "70536",
+      "hideAreas": []
+    },
+    {
+      "type": "highlight",
+      "description": "The custom `ERC-7201` storage slot uses a masked `keccak256` hash to avoid storage collisions in upgradeable contracts.",
+      "file": "contracts/utils/types/EventNonce.sol",
+      "highlight": [
+        {
+          "start": 15,
+          "end": 16
+        }
+      ],
+      "title": "",
+      "id": "70548",
+      "hideAreas": []
+    },
+    {
+      "type": "textOnly",
+      "description": "With **bitwise role flags**, **nested mappings**, **event emission**, and sequential, collision-safe **nonces**, the `Operator` system provides permission management and a verifiable on-chain audit trail.",
+      "title": "",
+      "id": "70524"
+    },
+    {
+      "type": "textOnly",
+      "description": "With **bitwise role flags**, **nested mappings**, transparent **event emission**, and sequential, collision-safe `nonces`, the `Operator` system provides permission management and a verifiable **on-chain audit trail**.",
+      "title": "",
+      "id": "70549"
+    }
+  ]
+}
